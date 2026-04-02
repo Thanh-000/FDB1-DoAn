@@ -54,14 +54,18 @@ The repository also includes a standalone heterogeneous GNN prototype for IEEE-C
 
 1. Open [notebooks/IEEE_GNN_Colab_Benchmark.ipynb](./notebooks/IEEE_GNN_Colab_Benchmark.ipynb) in Google Colab.
 2. Set `Runtime -> Change runtime type -> GPU`.
-3. In the config cell, set:
+3. Mount Google Drive.
+4. If the IEEE dataset is stored as a zip in `MyDrive`, set:
+   - `ZIP_PATH` to the zip file path, for example `/content/drive/MyDrive/ieee-fraud-detection.zip`
+   - `EXTRACT_ROOT` to `/content`
+   - `DATA_DIR` to the extracted folder, usually `/content/ieee-fraud-detection`
+5. In the config cell, set:
    - `REPO_DIR` to your repository path on Google Drive
-   - `DATA_DIR` to the IEEE dataset folder, usually `ieee-fraud-detection`
-4. Run the dependency install cell.
-5. Run the benchmark cell. It calls:
+6. Run the dependency install cell.
+7. Run the benchmark cell. It calls:
 
 ```bash
-python run_ieee_gnn.py --data-dir ieee-fraud-detection --fold-index 0 --n-splits 5 --epochs 30 --hidden-dim 64
+python run_ieee_gnn.py --data-dir /content/ieee-fraud-detection --fold-index 0 --n-splits 5 --epochs 30 --hidden-dim 64
 ```
 
 ### Colab references
