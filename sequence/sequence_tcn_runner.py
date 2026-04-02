@@ -225,8 +225,8 @@ def _predict(model: nn.Module, loader: DataLoader, device: torch.device) -> np.n
     preds = []
     with torch.no_grad():
         for x, lengths, _ in loader:
-            x = x.to(device)
-            lengths = lengths.to(device)
+            x = x.to(device, non_blocking=(device.type == "cuda"))
+            lengths = lengths.to(device, non_blocking=(device.type == "cuda"))
             logits = model(x, lengths)
             probs = torch.sigmoid(logits).cpu().numpy()
             preds.append(probs)
@@ -250,10 +250,25 @@ def train_fold_tcn(
     train_ds = SequenceDataset(bundle.x_train, bundle.len_train, bundle.y_train)
     val_ds = SequenceDataset(bundle.x_val, bundle.len_val, bundle.y_val)
 
-    train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True)
-    val_loader = DataLoader(val_ds, batch_size=batch_size, shuffle=False)
-
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    if device.type == "cuda":
+        print(f"[TCN] Device: cuda ({torch.cuda.get_device_name(0)})")
+    else:
+        print("[TCN] Device: cpu")
+
+    train_loader = DataLoader(
+        train_ds,
+        batch_size=batch_size,
+        shuffle=True,
+        pin_memory=(device.type == "cuda"),
+    )
+    val_loader = DataLoader(
+        val_ds,
+        batch_size=batch_size,
+        shuffle=False,
+        pin_memory=(device.type == "cuda"),
+    )
+
     model = TCNFraudModel(input_dim=len(bundle.feature_cols), hidden_dim=hidden_dim).to(device)
 
     pos = max(float(bundle.y_train.sum()), 1.0)
@@ -265,9 +280,9 @@ def train_fold_tcn(
     for _ in range(epochs):
         model.train()
         for x, lengths, y in train_loader:
-            x = x.to(device)
-            lengths = lengths.to(device)
-            y = y.to(device)
+            x = x.to(device, non_blocking=(device.type == "cuda"))
+            lengths = lengths.to(device, non_blocking=(device.type == "cuda"))
+            y = y.to(device, non_blocking=(device.type == "cuda"))
             optimizer.zero_grad()
             logits = model(x, lengths)
             loss = criterion(logits, y)
