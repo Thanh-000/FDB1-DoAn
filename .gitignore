@@ -15,3 +15,23 @@ archive/*.csv
 .env
 .venv/
 venv/
+
+# Local maintenance / scratch files not meant for the public repo
+*_BACKUP_*.ipynb
+apply_*.py
+patch_*.py
+fix_*.py
+check*.py
+verify_*.py
+cleanup_*.py
+deep_code_reviewer.py
+diff.txt
+refactor.py
+replace.js
+replace_proposal.py
+restructure.py
+restructure2.py
+shorten.py
+sort_tracker.py
+tracker_*.xlsx
+upgrade_*.py
