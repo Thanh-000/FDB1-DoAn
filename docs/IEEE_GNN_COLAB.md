@@ -16,14 +16,35 @@ from google.colab import drive
 drive.mount('/content/drive')
 ```
 
+## 3. Clone or update the repo from GitHub
+
 ```python
-%cd "/content/drive/MyDrive/Digital Financial Transaction Fraud Detection Using Explainable Multi-Model Machine Learning on PaySim and IEEE-CIS"
+GITHUB_REPO = "https://github.com/Thanh-000/FDB1-DoAn.git"
+REPO_PARENT = "/content/drive/MyDrive"
+REPO_NAME = "FDB1-DoAn"
+```
+
+```python
+import os
+
+repo_path = os.path.join(REPO_PARENT, REPO_NAME)
+if not os.path.exists(repo_path):
+    !git clone "$GITHUB_REPO" "$repo_path"
+else:
+    %cd "$repo_path"
+    !git pull
+
+print("REPO_DIR:", repo_path)
+```
+
+```python
+%cd "/content/drive/MyDrive/FDB1-DoAn"
 !ls gnn
 ```
 
 If your repo is stored in a different Drive path, change the `%cd` line accordingly.
 
-## 3. Configure dataset zip and extract
+## 4. Configure dataset zip and extract
 
 If your IEEE dataset is stored as a zip file in `MyDrive`, set these paths:
 
@@ -47,7 +68,7 @@ print("DATA_DIR:", DATA_DIR)
 
 If your zip extracts into a nested folder, point `DATA_DIR` to that nested folder instead.
 
-## 4. Install dependencies
+## 5. Install dependencies
 
 Colab usually already has `torch`. Install the missing graph stack and ML utilities:
 
@@ -64,7 +85,7 @@ print("CUDA available:", torch.cuda.is_available())
 !pip -q install scikit-learn torch-geometric
 ```
 
-## 5. Sanity check imports
+## 6. Sanity check imports
 
 ```python
 import torch
@@ -79,7 +100,7 @@ print("pandas:", pd.__version__)
 print("CUDA:", torch.cuda.is_available())
 ```
 
-## 6. Run a one-fold GNN benchmark
+## 7. Run a one-fold GNN benchmark
 
 Start with the first temporal fold:
 
@@ -92,7 +113,7 @@ Start with the first temporal fold:
   --hidden-dim 64
 ```
 
-## 7. Run a stronger benchmark
+## 8. Run a stronger benchmark
 
 If the first fold runs cleanly, try a slightly stronger setting:
 
@@ -105,7 +126,7 @@ If the first fold runs cleanly, try a slightly stronger setting:
   --hidden-dim 96
 ```
 
-## 8. What to send back
+## 9. What to send back
 
 After the run, keep these lines:
 
@@ -117,7 +138,7 @@ After the run, keep these lines:
 
 That is enough to decide whether the GNN branch is worth fusing into the main IEEE notebook.
 
-## 9. Recommended next step after a clean run
+## 10. Recommended next step after a clean run
 
 If standalone GNN has useful signal:
 
