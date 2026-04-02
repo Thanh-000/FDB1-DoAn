@@ -97,13 +97,111 @@ This negative result is still valuable:
 - it shows that a simple sequential deep branch is not enough by itself
 - it supports the view that stronger representation learning or pre-training is needed before adding new deep views
 
+## 3. SAINT branch
+
+### What was tested
+
+A standalone `SAINT`-style tabular transformer branch was benchmarked with:
+
+- a compact `20`-feature numerical subset
+- temporal fold evaluation on Colab
+- supervised-only training
+
+### Observed result
+
+The branch showed real signal and was stronger than the earlier `TCN` and `GNN` branches.
+
+However:
+
+- it did not clearly exceed the best standalone `SCARF` result
+- it did not justify integration into the main tabular backbone
+
+### Why it was not integrated
+
+It was not integrated into the main architecture because:
+
+- the gain over other neural standalone branches was not decisive
+- it still remained below the stable tabular backbone in practical value
+- the project needed a stronger reason than "non-trivial standalone signal" before increasing main-pipeline complexity
+
+### Interpretation
+
+`SAINT` remains a valid research baseline, but not an accepted production-path branch for this project state.
+
+## 4. SCARF branch
+
+### What was tested
+
+A standalone `SCARF` branch was evaluated under:
+
+- compact numerical feature subset
+- contrastive pre-training
+- downstream fine-tuning
+- no-pretrain ablation
+- frozen-encoder ablation
+
+### Observed result
+
+This branch produced the first clearly positive neural result:
+
+- `SCARF pretrain + fine-tune` beat `no-pretrain`
+- `SCARF pretrain + fine-tune` beat `SCARF + freeze`
+
+So the representation-learning idea itself was validated.
+
+### Why it was not integrated
+
+The branch was still excluded from the main architecture because:
+
+- standalone performance remained below the main tabular backbone
+- `SCARF score fusion` into the main meta-learner did not improve the main metric `AUPRC`
+- the tested fusion only increased complexity without measurable system gain
+
+### Interpretation
+
+`SCARF` is not a negative result in the same sense as `TCN` or `GNN`.
+It is a partial positive result:
+
+- useful as a research finding
+- not yet useful as an integrated production branch
+
+## 5. TabM branch
+
+### What was tested
+
+A standalone `TabM`-style deep tabular branch was benchmarked, then integrated as an optional fourth learner into the IEEE-CIS stacking notebook.
+
+### Observed result
+
+The standalone benchmark was the strongest deep-tabular result among the tested neural branches.
+
+But when integrated into the main backbone:
+
+- the meta-learner assigned `TabM` very low importance
+- the integrated system did not show meaningful improvement over the baseline
+
+### Why it was not integrated
+
+`TabM` was removed from the main architecture because:
+
+- integration into the stack did not materially improve the main system
+- the added learner mostly duplicated existing tabular signal instead of contributing a distinct gain
+- the stable tree-based backbone remained stronger in practice
+
+### Interpretation
+
+`TabM` is a valuable standalone benchmark and the strongest deep-tabular candidate tested so far.
+However, for this project stage it is still a research branch, not part of the accepted main architecture.
+
 ## What these negative results imply
 
-The project learned three important lessons:
+The project learned several important lessons:
 
 1. strong leakage-safe tabular baselines are hard to beat
 2. adding a new deep branch is not automatically useful
 3. temporal robustness matters more than architectural novelty alone
+4. positive standalone signal is not enough; integration must improve the system-level `AUPRC`
+5. representation learning may still matter, but only if it changes the final ensemble in a measurable way
 
 ## Exclusion rule
 
@@ -112,12 +210,12 @@ An experimental branch is not integrated into the main architecture unless:
 - it wins as a standalone model
 - or it materially improves the main system after fusion
 
-Neither the tested `GNN` branch nor the tested `TCN` branch satisfied that rule.
+The tested `GNN`, `TCN`, `SAINT`, `SCARF fusion`, and `TabM integration` branches did not satisfy that rule.
 
 ## Consequence for the next phase
 
 The next research phase should focus on more principled directions:
 
-- `SCARF` for representation pre-training
-- `SAINT` for stronger tabular deep modeling
-- later `GTAN` only if a graph-temporal branch is revisited at a much higher implementation level
+- stronger backbone research rather than naive branch addition
+- representation-learning methods only when they can be shown to improve the final system
+- later graph-temporal work only if revisited at a much higher implementation level

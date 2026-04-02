@@ -49,6 +49,7 @@ The active modeling path is:
 - The next paper-design options after TCN are documented in [docs/scarf-saint-design.md](./docs/scarf-saint-design.md).
 - The controlled integration path for `SCARF` is documented in [docs/scarf-fusion-design.md](./docs/scarf-fusion-design.md).
 - The next deep-tabular backbone candidate is documented in [docs/tabm-design.md](./docs/tabm-design.md).
+- Follow-up backbone research after the TabM integration test is documented in [docs/post-tabm-research-notes.md](./docs/post-tabm-research-notes.md).
 
 ## Run on Colab
 
