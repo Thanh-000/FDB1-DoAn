@@ -139,20 +139,38 @@ def base_preprocess(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def _build_sequences_for_frame(df_hist: pd.DataFrame, df_target: pd.DataFrame, feature_cols: list[str], window: int) -> tuple[np.ndarray, np.ndarray]:
+def _build_train_sequences(df: pd.DataFrame, feature_cols: list[str], window: int) -> tuple[np.ndarray, np.ndarray]:
+    seq = np.zeros((len(df), window, len(feature_cols)), dtype=np.float32)
+    lengths = np.zeros(len(df), dtype=np.int64)
+
+    for _, grp in df.groupby("AccountID", sort=False):
+        vals = grp[feature_cols].to_numpy(dtype=np.float32, copy=False)
+        vals = np.nan_to_num(vals, nan=0.0, posinf=0.0, neginf=0.0)
+        idxs = grp.index.to_numpy(dtype=np.int64, copy=False)
+        for pos, idx in enumerate(idxs):
+            start = max(0, pos - window + 1)
+            s = vals[start : pos + 1]
+            seq[idx, -len(s) :, :] = s
+            lengths[idx] = len(s)
+    return seq, lengths
+
+
+def _build_val_sequences(
+    df_hist: pd.DataFrame,
+    df_target: pd.DataFrame,
+    feature_cols: list[str],
+    window: int,
+) -> tuple[np.ndarray, np.ndarray]:
     combo = pd.concat(
         [
-            df_hist.assign(_split="hist", _row=np.arange(len(df_hist))),
-            df_target.assign(_split="target", _row=np.arange(len(df_target))),
+            df_hist.assign(split_flag="hist", row_id=-1),
+            df_target.assign(split_flag="target", row_id=np.arange(len(df_target))),
         ],
         ignore_index=True,
     ).sort_values("TransactionDT").reset_index(drop=True)
 
     seq = np.zeros((len(df_target), window, len(feature_cols)), dtype=np.float32)
     lengths = np.zeros(len(df_target), dtype=np.int64)
-
-    history: dict[str, list[np.ndarray]] = {}
-    target_row_pos: dict[int, int] = {i: i for i in range(len(df_target))}
 
     for _, grp in combo.groupby("AccountID", sort=False):
         past: list[np.ndarray] = []
@@ -162,12 +180,11 @@ def _build_sequences_for_frame(df_hist: pd.DataFrame, df_target: pd.DataFrame, f
             past.append(current)
             if len(past) > window:
                 past = past[-window:]
-            if getattr(row, "_split") == "target":
-                idx = target_row_pos[getattr(row, "_row")]
+            if getattr(row, "split_flag") == "target":
+                idx = int(getattr(row, "row_id"))
                 s = np.stack(past, axis=0)
-                seq[idx, -len(s):, :] = s
+                seq[idx, -len(s) :, :] = s
                 lengths[idx] = len(s)
-        history.clear()
     return seq, lengths
 
 
@@ -186,11 +203,11 @@ def build_fold_sequences(df_tr: pd.DataFrame, df_vl: pd.DataFrame, window: int) 
 
     df_tr_seq = df_tr.copy()
     df_vl_seq = df_vl.copy()
-    df_tr_seq.loc[:, feature_cols] = x_tr_scaled.values
-    df_vl_seq.loc[:, feature_cols] = x_vl_scaled.values
+    df_tr_seq[feature_cols] = x_tr_scaled.astype(np.float32)
+    df_vl_seq[feature_cols] = x_vl_scaled.astype(np.float32)
 
-    x_train, len_train = _build_sequences_for_frame(df_tr_seq, df_tr_seq, feature_cols, window)
-    x_val, len_val = _build_sequences_for_frame(df_tr_seq, df_vl_seq, feature_cols, window)
+    x_train, len_train = _build_train_sequences(df_tr_seq, feature_cols, window)
+    x_val, len_val = _build_val_sequences(df_tr_seq, df_vl_seq, feature_cols, window)
 
     return FoldSequenceBundle(
         x_train=x_train,
