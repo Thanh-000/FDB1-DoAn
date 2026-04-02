@@ -43,6 +43,7 @@ The active modeling path is:
 - The first candidate extension is specified in [docs/tcn-branch-design.md](./docs/tcn-branch-design.md).
 - Experimental exclusions are recorded in [docs/negative-results.md](./docs/negative-results.md).
 - The next paper-design options after TCN are documented in [docs/scarf-saint-design.md](./docs/scarf-saint-design.md).
+- The controlled integration path for `SCARF` is documented in [docs/scarf-fusion-design.md](./docs/scarf-fusion-design.md).
 
 ## Run on Colab
 
