@@ -242,6 +242,60 @@ def train_downstream(
     }
 
 
+def run_fold_scarf(
+    df_tr: pd.DataFrame,
+    df_vl: pd.DataFrame,
+    *,
+    pretrain_epochs: int = 10,
+    downstream_epochs: int = 10,
+    batch_size: int = 2048,
+    hidden_dim: int = 256,
+    emb_dim: int = 128,
+    proj_dim: int = 128,
+    lr: float = 1e-3,
+    corruption_rate: float = 0.6,
+    freeze_encoder: bool = False,
+    no_pretrain: bool = False,
+) -> dict[str, float | np.ndarray | list[str]]:
+    bundle = build_fold_tabular(df_tr, df_vl)
+    print(f"[SCARF] feature_cols ({len(bundle.feature_cols)}): {bundle.feature_cols}")
+
+    if no_pretrain:
+        print("[SCARF] Skipping contrastive pretraining")
+        encoder = MLPEncoder(
+            input_dim=len(bundle.feature_cols),
+            hidden_dim=hidden_dim,
+            emb_dim=emb_dim,
+        )
+    else:
+        encoder = pretrain_scarf(
+            x_train=bundle.x_train,
+            input_dim=len(bundle.feature_cols),
+            hidden_dim=hidden_dim,
+            emb_dim=emb_dim,
+            proj_dim=proj_dim,
+            epochs=pretrain_epochs,
+            batch_size=batch_size,
+            lr=lr,
+            corruption_rate=corruption_rate,
+        )
+
+    result = train_downstream(
+        encoder=encoder,
+        x_train=bundle.x_train,
+        y_train=bundle.y_train,
+        x_val=bundle.x_val,
+        y_val=bundle.y_val,
+        emb_dim=emb_dim,
+        epochs=downstream_epochs,
+        batch_size=batch_size,
+        lr=lr,
+        freeze_encoder=freeze_encoder,
+    )
+    result["feature_cols"] = bundle.feature_cols
+    return result
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--data-dir", required=True)
@@ -270,40 +324,19 @@ def main() -> None:
     print(f"[SCARF] Fold {args.fold_index + 1}/{args.n_splits}")
     print(f"[SCARF] Train: {len(df_tr)}, Val: {len(df_vl)}")
 
-    bundle = build_fold_tabular(df_tr, df_vl)
-    print(f"[SCARF] feature_cols ({len(bundle.feature_cols)}): {bundle.feature_cols}")
-
-    if args.no_pretrain:
-        print("[SCARF] Skipping contrastive pretraining")
-        encoder = MLPEncoder(
-            input_dim=len(bundle.feature_cols),
-            hidden_dim=args.hidden_dim,
-            emb_dim=args.emb_dim,
-        )
-    else:
-        encoder = pretrain_scarf(
-            x_train=bundle.x_train,
-            input_dim=len(bundle.feature_cols),
-            hidden_dim=args.hidden_dim,
-            emb_dim=args.emb_dim,
-            proj_dim=args.proj_dim,
-            epochs=args.pretrain_epochs,
-            batch_size=args.batch_size,
-            lr=args.lr,
-            corruption_rate=args.corruption_rate,
-        )
-
-    result = train_downstream(
-        encoder=encoder,
-        x_train=bundle.x_train,
-        y_train=bundle.y_train,
-        x_val=bundle.x_val,
-        y_val=bundle.y_val,
-        emb_dim=args.emb_dim,
-        epochs=args.downstream_epochs,
+    result = run_fold_scarf(
+        df_tr=df_tr,
+        df_vl=df_vl,
+        pretrain_epochs=args.pretrain_epochs,
+        downstream_epochs=args.downstream_epochs,
         batch_size=args.batch_size,
+        hidden_dim=args.hidden_dim,
+        emb_dim=args.emb_dim,
+        proj_dim=args.proj_dim,
         lr=args.lr,
+        corruption_rate=args.corruption_rate,
         freeze_encoder=args.freeze_encoder,
+        no_pretrain=args.no_pretrain,
     )
 
     print("[SCARF] Metrics")
