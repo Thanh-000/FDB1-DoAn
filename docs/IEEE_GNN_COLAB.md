@@ -46,27 +46,30 @@ If your repo is stored in a different Drive path, change the `%cd` line accordin
 
 ## 4. Configure dataset zip and extract
 
-If your IEEE dataset is stored as a zip file in `MyDrive`, set these paths:
+Follow the same dataset pattern used by the main IEEE notebook:
 
 ```python
-ZIP_PATH = "/content/drive/MyDrive/ieee-fraud-detection.zip"
-EXTRACT_ROOT = "/content"
-DATA_DIR = "/content/ieee-fraud-detection"
+import os, zipfile, glob
+
+ZIP_PATH = "/content/drive/MyDrive/MVS_XAI_Data/ieee-fraud-detection.zip"
+EXTRACT_DIR = "/content/ieee-fraud-detection"
+
+if not os.path.exists(EXTRACT_DIR):
+    os.makedirs(EXTRACT_DIR, exist_ok=True)
+    with zipfile.ZipFile(ZIP_PATH, "r") as zip_ref:
+        zip_ref.extractall(EXTRACT_DIR)
+
+txn_files = glob.glob(f"{EXTRACT_DIR}/**/train_transaction.csv", recursive=True)
+id_files = glob.glob(f"{EXTRACT_DIR}/**/train_identity.csv", recursive=True)
+
+print("txn:", txn_files[:1])
+print("id :", id_files[:1])
+
+DATA_DIR = os.path.dirname(txn_files[0])
+print("DATA_DIR =", DATA_DIR)
 ```
 
-```python
-import os
-import zipfile
-
-if ZIP_PATH and not os.path.exists(DATA_DIR):
-    with zipfile.ZipFile(ZIP_PATH, "r") as zf:
-        zf.extractall(EXTRACT_ROOT)
-
-print("DATA_DIR:", DATA_DIR)
-!ls "$DATA_DIR"
-```
-
-If your zip extracts into a nested folder, point `DATA_DIR` to that nested folder instead.
+If your zip is stored elsewhere, only change `ZIP_PATH`.
 
 ## 5. Install dependencies
 
@@ -106,7 +109,7 @@ Start with the first temporal fold:
 
 ```python
 !python run_ieee_gnn.py \
-  --data-dir /content/ieee-fraud-detection \
+  --data-dir "$DATA_DIR" \
   --fold-index 0 \
   --n-splits 5 \
   --epochs 30 \
@@ -119,7 +122,7 @@ If the first fold runs cleanly, try a slightly stronger setting:
 
 ```python
 !python run_ieee_gnn.py \
-  --data-dir /content/ieee-fraud-detection \
+  --data-dir "$DATA_DIR" \
   --fold-index 0 \
   --n-splits 5 \
   --epochs 50 \
