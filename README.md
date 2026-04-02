@@ -37,6 +37,8 @@ The active modeling path is:
 - Colab is the preferred execution environment for the notebooks.
 - The next architecture research phase is documented in [docs/research-roadmap.md](./docs/research-roadmap.md).
 - The first candidate extension is specified in [docs/tcn-branch-design.md](./docs/tcn-branch-design.md).
+- Experimental exclusions are recorded in [docs/negative-results.md](./docs/negative-results.md).
+- The next paper-design options after TCN are documented in [docs/scarf-saint-design.md](./docs/scarf-saint-design.md).
 
 ## Run on Colab
 
