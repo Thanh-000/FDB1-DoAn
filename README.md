@@ -11,9 +11,11 @@ This repository contains the working code and notebooks for a fraud-detection re
 - [notebooks/MVS_XAI_Colab_DataPrep_Phase1.ipynb](./notebooks/MVS_XAI_Colab_DataPrep_Phase1.ipynb): preprocessing and preparation notebook
 - [notebooks/IEEE_TCN_Colab_Benchmark.ipynb](./notebooks/IEEE_TCN_Colab_Benchmark.ipynb): Colab notebook for standalone TCN benchmarking
 - [notebooks/IEEE_SCARF_Colab_Benchmark.ipynb](./notebooks/IEEE_SCARF_Colab_Benchmark.ipynb): Colab notebook for standalone SCARF benchmarking
+- [notebooks/IEEE_SAINT_Colab_Benchmark.ipynb](./notebooks/IEEE_SAINT_Colab_Benchmark.ipynb): Colab notebook for standalone SAINT benchmarking
 - [scripts/MVS_XAI_Dashboard.py](./scripts/MVS_XAI_Dashboard.py): dashboard prototype
 - [run_ieee_tcn.py](./run_ieee_tcn.py): standalone TCN sequence benchmark entrypoint
 - [run_ieee_scarf.py](./run_ieee_scarf.py): standalone SCARF benchmark entrypoint
+- [run_ieee_saint.py](./run_ieee_saint.py): standalone SAINT benchmark entrypoint
 
 ## Current architecture
 
@@ -81,3 +83,16 @@ The active modeling path is:
    - extract the IEEE dataset zip
    - locate `train_transaction.csv` and `train_identity.csv`
    - run `run_ieee_scarf.py`
+
+### SAINT benchmark notebook
+
+1. Open [notebooks/IEEE_SAINT_Colab_Benchmark.ipynb](./notebooks/IEEE_SAINT_Colab_Benchmark.ipynb) in Google Colab.
+2. Set `Runtime -> Change runtime type -> GPU`.
+3. Keep the dataset zip in Drive, by default:
+   - `/content/drive/MyDrive/MVS_XAI_Data/ieee-fraud-detection.zip`
+4. Run cells from top to bottom.
+5. The notebook will:
+   - clone or pull the repo
+   - extract the IEEE dataset zip
+   - locate `train_transaction.csv` and `train_identity.csv`
+   - run `run_ieee_saint.py`
