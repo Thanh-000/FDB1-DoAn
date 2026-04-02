@@ -55,6 +55,8 @@ def _build_entity_maps(df_tr: pd.DataFrame, df_vl: pd.DataFrame) -> Dict[str, Di
     for node_type, col in ENTITY_SPECS.items():
         values = pd.concat([df_tr[col], df_vl[col]], ignore_index=True).astype(str).map(_normalize_token)
         uniq = pd.Index(values.unique())
+        if "UNKNOWN" not in uniq:
+            uniq = pd.Index(["UNKNOWN"]).append(uniq)
         maps[node_type] = {token: idx for idx, token in enumerate(uniq)}
     return maps
 
@@ -64,7 +66,8 @@ def _encode_entity_series(
     mapping: Mapping[str, int],
 ) -> np.ndarray:
     arr = pd.Series(values, copy=False).astype(str).map(_normalize_token)
-    return arr.map(mapping).fillna(mapping["UNKNOWN"]).to_numpy(dtype=np.int64, copy=False)
+    unknown_idx = mapping.get("UNKNOWN", 0)
+    return arr.map(mapping).fillna(unknown_idx).to_numpy(dtype=np.int64, copy=False)
 
 
 def build_fold_hetero_graph(
