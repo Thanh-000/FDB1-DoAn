@@ -9,32 +9,30 @@ This repository contains the working code and notebooks for a fraud-detection re
 
 - [notebooks/MVS_XAI_Colab_IEEE_CIS.ipynb](./notebooks/MVS_XAI_Colab_IEEE_CIS.ipynb): main IEEE-CIS research notebook
 - [notebooks/MVS_XAI_Colab_DataPrep_Phase1.ipynb](./notebooks/MVS_XAI_Colab_DataPrep_Phase1.ipynb): preprocessing and preparation notebook
-- [scripts/Colab_Phase2_Sequence_Graph.py](./scripts/Colab_Phase2_Sequence_Graph.py): sequence/graph experimentation script
 - [scripts/MVS_XAI_Dashboard.py](./scripts/MVS_XAI_Dashboard.py): dashboard prototype
 
-## GNN branch
+## Current architecture
 
-The repository also includes a standalone heterogeneous GNN prototype for IEEE-CIS:
-
-- [gnn/ieee_gnn_graph.py](./gnn/ieee_gnn_graph.py)
-- [gnn/ieee_gnn_model.py](./gnn/ieee_gnn_model.py)
-- [gnn/ieee_gnn_train.py](./gnn/ieee_gnn_train.py)
-- [gnn/ieee_gnn_runner.py](./gnn/ieee_gnn_runner.py)
-- [run_ieee_gnn.py](./run_ieee_gnn.py): simple root entrypoint
-- [notebooks/IEEE_GNN_Colab_Benchmark.ipynb](./notebooks/IEEE_GNN_Colab_Benchmark.ipynb)
-- [docs/IEEE_GNN_COLAB.md](./docs/IEEE_GNN_COLAB.md)
-
-## Repository layout
+The current project backbone is centered on the IEEE-CIS notebook and uses:
 
 - `notebooks/`: Colab notebooks
-- `gnn/`: standalone hetero GNN branch
 - `scripts/`: support scripts and dashboard code
-- `docs/`: notes, proposal files, and Colab instructions
+- `docs/`: notes and proposal files
+
+The active modeling path is:
+
+- fold-local preprocessing
+- temporal and aggregate tabular features
+- graph-derived motif features
+- `XGBoost + LightGBM + CatBoost`
+- `XGB` meta-learner
+- UID post-processing
+- threshold policy for balanced or high-recall operation
 
 ## Notes
 
 - Raw datasets are intentionally excluded from Git because they are too large for GitHub.
-- Colab is the preferred execution environment for the notebooks and the GNN benchmark.
+- Colab is the preferred execution environment for the notebooks.
 
 ## Run on Colab
 
@@ -49,26 +47,3 @@ The repository also includes a standalone heterogeneous GNN prototype for IEEE-C
    - `ieee-fraud-detection/test_identity.csv`
 4. Update any dataset path variables in the notebook if your Drive structure is different.
 5. Run cells from top to bottom.
-
-### GNN benchmark notebook
-
-1. Open [notebooks/IEEE_GNN_Colab_Benchmark.ipynb](./notebooks/IEEE_GNN_Colab_Benchmark.ipynb) in Google Colab.
-2. Set `Runtime -> Change runtime type -> GPU`.
-3. Mount Google Drive.
-4. Clone or update the repo into Drive directly from GitHub in the repo-download cell.
-5. The GNN notebook follows the same dataset pattern as the main IEEE notebook:
-   - `ZIP_PATH = /content/drive/MyDrive/MVS_XAI_Data/ieee-fraud-detection.zip`
-   - extract to `/content/ieee-fraud-detection`
-   - use `glob` to locate `train_transaction.csv` and `train_identity.csv`
-6. In the config cell, confirm `REPO_DIR` matches the cloned repo path on Drive.
-7. Run the dependency install cell.
-8. Run the benchmark cell. It calls:
-
-```bash
-python run_ieee_gnn.py --data-dir "$DATA_DIR" --fold-index 0 --n-splits 5 --epochs 30 --hidden-dim 64
-```
-
-### Colab references
-
-- Detailed GNN Colab instructions: [docs/IEEE_GNN_COLAB.md](./docs/IEEE_GNN_COLAB.md)
-- Root GNN entrypoint: [run_ieee_gnn.py](./run_ieee_gnn.py)
