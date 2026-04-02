@@ -9,8 +9,8 @@ import torch
 import torch.nn.functional as F
 from sklearn.metrics import average_precision_score, roc_auc_score
 
-from ieee_gnn_graph import FoldGraphBundle, build_fold_hetero_graph
-from ieee_gnn_model import IEEEFraudHeteroGNN
+from gnn.ieee_gnn_graph import FoldGraphBundle, build_fold_hetero_graph
+from gnn.ieee_gnn_model import IEEEFraudHeteroGNN
 
 
 @dataclass

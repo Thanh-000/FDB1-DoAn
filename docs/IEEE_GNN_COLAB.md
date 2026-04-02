@@ -18,7 +18,7 @@ drive.mount('/content/drive')
 
 ```python
 %cd "/content/drive/MyDrive/Digital Financial Transaction Fraud Detection Using Explainable Multi-Model Machine Learning on PaySim and IEEE-CIS"
-!ls ieee_gnn_*.py
+!ls gnn
 ```
 
 If your repo is stored in a different Drive path, change the `%cd` line accordingly.
@@ -60,7 +60,7 @@ print("CUDA:", torch.cuda.is_available())
 Start with the first temporal fold:
 
 ```python
-!python ieee_gnn_runner.py \
+!python run_ieee_gnn.py \
   --data-dir ieee-fraud-detection \
   --fold-index 0 \
   --n-splits 5 \
@@ -73,7 +73,7 @@ Start with the first temporal fold:
 If the first fold runs cleanly, try a slightly stronger setting:
 
 ```python
-!python ieee_gnn_runner.py \
+!python run_ieee_gnn.py \
   --data-dir ieee-fraud-detection \
   --fold-index 0 \
   --n-splits 5 \

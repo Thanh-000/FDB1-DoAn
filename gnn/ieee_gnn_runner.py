@@ -9,7 +9,7 @@ import pandas as pd
 from sklearn.model_selection import TimeSeriesSplit
 from sklearn.preprocessing import MinMaxScaler
 
-from ieee_gnn_train import train_fold_gnn
+from gnn.ieee_gnn_train import train_fold_gnn
 
 
 RAW_COLS = [
