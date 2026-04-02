@@ -10,6 +10,7 @@ This repository contains the working code and notebooks for a fraud-detection re
 - [notebooks/MVS_XAI_Colab_IEEE_CIS.ipynb](./notebooks/MVS_XAI_Colab_IEEE_CIS.ipynb): main IEEE-CIS research notebook
 - [notebooks/MVS_XAI_Colab_DataPrep_Phase1.ipynb](./notebooks/MVS_XAI_Colab_DataPrep_Phase1.ipynb): preprocessing and preparation notebook
 - [scripts/MVS_XAI_Dashboard.py](./scripts/MVS_XAI_Dashboard.py): dashboard prototype
+- [run_ieee_tcn.py](./run_ieee_tcn.py): standalone TCN sequence benchmark entrypoint
 
 ## Current architecture
 
