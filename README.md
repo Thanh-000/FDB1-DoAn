@@ -34,6 +34,7 @@ The active modeling path is:
 - Raw datasets are intentionally excluded from Git because they are too large for GitHub.
 - Colab is the preferred execution environment for the notebooks.
 - The next architecture research phase is documented in [docs/research-roadmap.md](./docs/research-roadmap.md).
+- The first candidate extension is specified in [docs/tcn-branch-design.md](./docs/tcn-branch-design.md).
 
 ## Run on Colab
 
