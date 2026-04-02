@@ -196,6 +196,7 @@ def train_downstream(
     train_ds = ArrayDataset(x_train, y_train)
     val_ds = ArrayDataset(x_val, y_val)
     train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True, pin_memory=(device.type == "cuda"))
+    train_loader_eval = DataLoader(train_ds, batch_size=batch_size, shuffle=False, pin_memory=(device.type == "cuda"))
     val_loader = DataLoader(val_ds, batch_size=batch_size, shuffle=False, pin_memory=(device.type == "cuda"))
 
     pos = max(float(y_train.sum()), 1.0)
@@ -227,7 +228,7 @@ def train_downstream(
                 preds.append(torch.sigmoid(model(x)).cpu().numpy())
         return np.concatenate(preds)
 
-    train_probs = _predict(train_loader)
+    train_probs = _predict(train_loader_eval)
     val_probs = _predict(val_loader)
     return {
         "train_probs": train_probs,
@@ -255,6 +256,7 @@ def main() -> None:
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--corruption-rate", type=float, default=0.6)
     parser.add_argument("--freeze-encoder", action="store_true")
+    parser.add_argument("--no-pretrain", action="store_true")
     args = parser.parse_args()
 
     df = base_preprocess(load_ieee_train(args.data_dir))
@@ -271,17 +273,25 @@ def main() -> None:
     bundle = build_fold_tabular(df_tr, df_vl)
     print(f"[SCARF] feature_cols ({len(bundle.feature_cols)}): {bundle.feature_cols}")
 
-    encoder = pretrain_scarf(
-        x_train=bundle.x_train,
-        input_dim=len(bundle.feature_cols),
-        hidden_dim=args.hidden_dim,
-        emb_dim=args.emb_dim,
-        proj_dim=args.proj_dim,
-        epochs=args.pretrain_epochs,
-        batch_size=args.batch_size,
-        lr=args.lr,
-        corruption_rate=args.corruption_rate,
-    )
+    if args.no_pretrain:
+        print("[SCARF] Skipping contrastive pretraining")
+        encoder = MLPEncoder(
+            input_dim=len(bundle.feature_cols),
+            hidden_dim=args.hidden_dim,
+            emb_dim=args.emb_dim,
+        )
+    else:
+        encoder = pretrain_scarf(
+            x_train=bundle.x_train,
+            input_dim=len(bundle.feature_cols),
+            hidden_dim=args.hidden_dim,
+            emb_dim=args.emb_dim,
+            proj_dim=args.proj_dim,
+            epochs=args.pretrain_epochs,
+            batch_size=args.batch_size,
+            lr=args.lr,
+            corruption_rate=args.corruption_rate,
+        )
 
     result = train_downstream(
         encoder=encoder,
