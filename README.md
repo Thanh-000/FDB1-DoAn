@@ -14,12 +14,14 @@ This repository contains the working code and notebooks for a fraud-detection re
 - [notebooks/IEEE_SCARF_Fusion_Colab_Benchmark.ipynb](./notebooks/IEEE_SCARF_Fusion_Colab_Benchmark.ipynb): Colab notebook for SCARF score-fusion benchmarking
 - [notebooks/IEEE_SAINT_Colab_Benchmark.ipynb](./notebooks/IEEE_SAINT_Colab_Benchmark.ipynb): Colab notebook for standalone SAINT benchmarking
 - [notebooks/IEEE_TABM_Colab_Benchmark.ipynb](./notebooks/IEEE_TABM_Colab_Benchmark.ipynb): Colab notebook for standalone TabM-style benchmarking
+- [notebooks/IEEE_REALMLP_Colab_Benchmark.ipynb](./notebooks/IEEE_REALMLP_Colab_Benchmark.ipynb): Colab notebook for standalone RealMLP-style benchmarking
 - [scripts/MVS_XAI_Dashboard.py](./scripts/MVS_XAI_Dashboard.py): dashboard prototype
 - [run_ieee_tcn.py](./run_ieee_tcn.py): standalone TCN sequence benchmark entrypoint
 - [run_ieee_scarf.py](./run_ieee_scarf.py): standalone SCARF benchmark entrypoint
 - [run_ieee_scarf_fusion.py](./run_ieee_scarf_fusion.py): SCARF score-fusion benchmark entrypoint
 - [run_ieee_saint.py](./run_ieee_saint.py): standalone SAINT benchmark entrypoint
 - [run_ieee_tabm.py](./run_ieee_tabm.py): standalone TabM-style benchmark entrypoint
+- [run_ieee_realmlp.py](./run_ieee_realmlp.py): standalone RealMLP-style benchmark entrypoint
 
 ## Current architecture
 
@@ -50,6 +52,7 @@ The active modeling path is:
 - The controlled integration path for `SCARF` is documented in [docs/scarf-fusion-design.md](./docs/scarf-fusion-design.md).
 - The next deep-tabular backbone candidate is documented in [docs/tabm-design.md](./docs/tabm-design.md).
 - Follow-up backbone research after the TabM integration test is documented in [docs/post-tabm-research-notes.md](./docs/post-tabm-research-notes.md).
+- The RealMLP benchmark direction is documented in [docs/realmlp-design.md](./docs/realmlp-design.md).
 
 ## Run on Colab
 
@@ -129,3 +132,17 @@ The active modeling path is:
    - extract the IEEE dataset zip
    - locate `train_transaction.csv` and `train_identity.csv`
    - run `run_ieee_tabm.py`
+
+### RealMLP benchmark notebook
+
+1. Open [notebooks/IEEE_REALMLP_Colab_Benchmark.ipynb](./notebooks/IEEE_REALMLP_Colab_Benchmark.ipynb) in Google Colab.
+2. Set `Runtime -> Change runtime type -> GPU`.
+3. Keep the dataset zip in Drive, by default:
+   - `/content/drive/MyDrive/MVS_XAI_Data/ieee-fraud-detection.zip`
+4. Run cells from top to bottom.
+5. The notebook will:
+   - clone or pull the repo
+   - copy the dataset zip to local Colab storage
+   - extract the IEEE dataset zip
+   - locate `train_transaction.csv` and `train_identity.csv`
+   - run `run_ieee_realmlp.py`
