@@ -1,0 +1,15 @@
+import re
+tex = open('proposal.tex', encoding='utf-8').read()
+sections = re.findall(r'\\(?:section|subsection|subsubsection)\{.*?\}', tex)
+for s in sections:
+    print(s)
+print(f"\n--- Total lines: {len(tex.splitlines())}")
+print(f"Has bibliography: {'thebibliography' in tex}")
+print(f"Has keywords: {'Keywords' in tex}")
+print(f"Has conclusion: {'Conclusion' in tex}")
+print(f"Has label fig:arch: {'label{fig:arch}' in tex}")  
+print(f"Has ref fig:arch: {'ref{fig:arch}' in tex}")
+print(f"Num bibitems: {len(re.findall('bibitem', tex))}")
+print(f"Has tab:data: {'tab:data' in tex}")
+print(f"Has tab:expected: {'tab:expected' in tex}")
+print(f"Has H3: {'H3' in tex}")

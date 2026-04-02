@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+
+.ipynb_checkpoints/
+.DS_Store
+Thumbs.db
+
+.agent/
+
+# Raw datasets: too large for GitHub, keep local/Drive only
+ieee-fraud-detection/*.csv
+archive/*.csv
+
+# Local environment files
+.env
+.venv/
+venv/
