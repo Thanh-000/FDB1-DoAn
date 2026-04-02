@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable
+import time
 
 import numpy as np
 import pandas as pd
@@ -139,56 +139,65 @@ def base_preprocess(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def _build_train_sequences(df: pd.DataFrame, feature_cols: list[str], window: int) -> tuple[np.ndarray, np.ndarray]:
-    seq = np.zeros((len(df), window, len(feature_cols)), dtype=np.float32)
-    lengths = np.zeros(len(df), dtype=np.int64)
+def _iter_group_positions(keys: np.ndarray):
+    codes, uniques = pd.factorize(keys, sort=False)
+    order = np.argsort(codes, kind="stable")
+    sorted_codes = codes[order]
+    boundaries = np.flatnonzero(np.r_[True, sorted_codes[1:] != sorted_codes[:-1], True])
+    for start, end in zip(boundaries[:-1], boundaries[1:]):
+        code = sorted_codes[start]
+        yield uniques[code], order[start:end]
 
-    for _, grp in df.groupby("AccountID", sort=False):
-        vals = grp[feature_cols].to_numpy(dtype=np.float32, copy=False)
-        vals = np.nan_to_num(vals, nan=0.0, posinf=0.0, neginf=0.0)
-        idxs = grp.index.to_numpy(dtype=np.int64, copy=False)
+
+def _build_train_sequences(
+    account_ids: np.ndarray,
+    features: np.ndarray,
+    window: int,
+) -> tuple[np.ndarray, np.ndarray, dict[str, np.ndarray]]:
+    seq = np.zeros((len(features), window, features.shape[1]), dtype=np.float32)
+    lengths = np.zeros(len(features), dtype=np.int64)
+    history_tails: dict[str, np.ndarray] = {}
+
+    for acct, idxs in _iter_group_positions(account_ids):
+        vals = features[idxs]
         for pos, idx in enumerate(idxs):
             start = max(0, pos - window + 1)
             s = vals[start : pos + 1]
             seq[idx, -len(s) :, :] = s
             lengths[idx] = len(s)
-    return seq, lengths
+        history_tails[str(acct)] = vals[-window:].copy()
+    return seq, lengths, history_tails
 
 
 def _build_val_sequences(
-    df_hist: pd.DataFrame,
-    df_target: pd.DataFrame,
-    feature_cols: list[str],
+    account_ids: np.ndarray,
+    features: np.ndarray,
+    history_tails: dict[str, np.ndarray],
     window: int,
 ) -> tuple[np.ndarray, np.ndarray]:
-    combo = pd.concat(
-        [
-            df_hist.assign(split_flag="hist", row_id=-1),
-            df_target.assign(split_flag="target", row_id=np.arange(len(df_target))),
-        ],
-        ignore_index=True,
-    ).sort_values("TransactionDT").reset_index(drop=True)
+    seq = np.zeros((len(features), window, features.shape[1]), dtype=np.float32)
+    lengths = np.zeros(len(features), dtype=np.int64)
 
-    seq = np.zeros((len(df_target), window, len(feature_cols)), dtype=np.float32)
-    lengths = np.zeros(len(df_target), dtype=np.int64)
-
-    for _, grp in combo.groupby("AccountID", sort=False):
-        past: list[np.ndarray] = []
-        for row in grp.itertuples(index=False):
-            current = np.asarray([getattr(row, c) for c in feature_cols], dtype=np.float32)
-            current = np.nan_to_num(current, nan=0.0, posinf=0.0, neginf=0.0)
+    for acct, idxs in _iter_group_positions(account_ids):
+        base = history_tails.get(str(acct))
+        if base is None:
+            past: list[np.ndarray] = []
+        else:
+            past = [row.copy() for row in base]
+        vals = features[idxs]
+        for pos, idx in enumerate(idxs):
+            current = vals[pos]
             past.append(current)
             if len(past) > window:
                 past = past[-window:]
-            if getattr(row, "split_flag") == "target":
-                idx = int(getattr(row, "row_id"))
-                s = np.stack(past, axis=0)
-                seq[idx, -len(s) :, :] = s
-                lengths[idx] = len(s)
+            s = np.stack(past, axis=0)
+            seq[idx, -len(s) :, :] = s
+            lengths[idx] = len(s)
     return seq, lengths
 
 
 def build_fold_sequences(df_tr: pd.DataFrame, df_vl: pd.DataFrame, window: int) -> FoldSequenceBundle:
+    t0 = time.time()
     feature_cols = [c for c in DEFAULT_SEQ_FEATURES if c in df_tr.columns and c in df_vl.columns]
     if not feature_cols:
         raise ValueError("No sequence feature columns available")
@@ -206,8 +215,16 @@ def build_fold_sequences(df_tr: pd.DataFrame, df_vl: pd.DataFrame, window: int) 
     df_tr_seq[feature_cols] = x_tr_scaled.astype(np.float32)
     df_vl_seq[feature_cols] = x_vl_scaled.astype(np.float32)
 
-    x_train, len_train = _build_train_sequences(df_tr_seq, feature_cols, window)
-    x_val, len_val = _build_val_sequences(df_tr_seq, df_vl_seq, feature_cols, window)
+    tr_account_ids = df_tr_seq["AccountID"].astype(str).to_numpy(copy=False)
+    vl_account_ids = df_vl_seq["AccountID"].astype(str).to_numpy(copy=False)
+    tr_features = np.nan_to_num(df_tr_seq[feature_cols].to_numpy(dtype=np.float32, copy=False), nan=0.0, posinf=0.0, neginf=0.0)
+    vl_features = np.nan_to_num(df_vl_seq[feature_cols].to_numpy(dtype=np.float32, copy=False), nan=0.0, posinf=0.0, neginf=0.0)
+
+    print(f"[TCN] Building train sequences: n={len(df_tr_seq)}, accounts={pd.Series(tr_account_ids).nunique()}, window={window}, feat={len(feature_cols)}")
+    x_train, len_train, history_tails = _build_train_sequences(tr_account_ids, tr_features, window)
+    print(f"[TCN] Building val sequences: n={len(df_vl_seq)}, accounts={pd.Series(vl_account_ids).nunique()}")
+    x_val, len_val = _build_val_sequences(vl_account_ids, vl_features, history_tails, window)
+    print(f"[TCN] Sequence build done in {time.time() - t0:.1f}s")
 
     return FoldSequenceBundle(
         x_train=x_train,
