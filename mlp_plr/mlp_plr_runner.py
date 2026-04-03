@@ -152,6 +152,7 @@ def train_fold_mlp_plr(
     df_vl = df.iloc[vl_i].reset_index(drop=True).copy()
     print(f"[MLP-PLR] Fold {fold_index + 1}/{n_splits}")
     print(f"[MLP-PLR] Train: {len(df_tr)}, Val: {len(df_vl)}")
+    print(f"[MLP-PLR] use_time_feature: {use_time_feature}")
 
     bundle = build_fold_tabular(df_tr, df_vl, use_time_feature=use_time_feature)
     print(f"[MLP-PLR] feature_cols ({len(bundle.feature_cols)}): {bundle.feature_cols}")
