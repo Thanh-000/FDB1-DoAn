@@ -9,17 +9,13 @@ The purpose is to preserve technical reasoning and prevent weak branches from be
 The active system remains:
 
 - fold-local preprocessing
-- tabular backbone with graph-derived fold-local features
-- long-history branch:
-  - `XGBoost + LightGBM + CatBoost`
-- recent-window branch:
-  - `XGB_recent + LGB_recent + CatBoost_recent`
-- time-decay sample weighting
+- stable tabular backbone
+- `XGBoost + LightGBM + CatBoost`
 - `XGB` meta-learner
 - UID smoothing
 - temporal evaluation on Colab
 
-This architecture remains the project baseline because it consistently outperformed the experimental branches below under stricter evaluation.
+This architecture remains the project baseline because it outperformed the experimental branches below under controlled ablation.
 
 ## 1. Heterogeneous GNN branch
 
@@ -253,13 +249,13 @@ An experimental branch is not integrated into the main architecture unless:
 - it wins as a standalone model
 - or it materially improves the main system after fusion
 
-The tested `GNN`, `TCN`, `SAINT`, `SCARF fusion`, `TabM integration`, and `MLP-PLR fusion` branches did not satisfy that rule.
+The tested `GNN`, `TCN`, `SAINT`, `SCARF fusion`, `TabM integration`, `MLP-PLR fusion`, `graph_only`, `decay_only`, `recent_only`, and `full_recent_decay` branches did not satisfy that rule.
 
 ## Consequence for the next phase
 
-The next research phase should focus on more principled directions:
+The next research phase should focus on:
 
-- stronger backbone research rather than naive branch addition
-- representation-learning methods only when they can be shown to improve the final system
-- later graph-temporal work only if revisited at a much higher implementation level
-- temporal-drift handling in the main system, because this is the first direction that showed system-level positive evidence
+- stronger feature-stability control on the accepted baseline
+- threshold and operating-policy optimization
+- tabular feature refinement with controlled ablation
+- model changes only when they beat the compact baseline ensemble

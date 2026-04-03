@@ -1,194 +1,49 @@
 # Digital Financial Transaction Fraud Detection
 
-This repository contains the working code and notebooks for a fraud-detection research project on:
-
-- `PaySim`
-- `IEEE-CIS Fraud Detection`
+This repository now keeps only the accepted production-path code and the supporting research notes needed to justify it.
 
 ## Main contents
 
-- [notebooks/MVS_XAI_Colab_IEEE_CIS.ipynb](./notebooks/MVS_XAI_Colab_IEEE_CIS.ipynb): main IEEE-CIS research notebook
+- [notebooks/MVS_XAI_Colab_IEEE_CIS.ipynb](./notebooks/MVS_XAI_Colab_IEEE_CIS.ipynb): main IEEE-CIS production notebook
 - [notebooks/MVS_XAI_Colab_DataPrep_Phase1.ipynb](./notebooks/MVS_XAI_Colab_DataPrep_Phase1.ipynb): preprocessing and preparation notebook
-- [notebooks/IEEE_TCN_Colab_Benchmark.ipynb](./notebooks/IEEE_TCN_Colab_Benchmark.ipynb): Colab notebook for standalone TCN benchmarking
-- [notebooks/IEEE_SCARF_Colab_Benchmark.ipynb](./notebooks/IEEE_SCARF_Colab_Benchmark.ipynb): Colab notebook for standalone SCARF benchmarking
-- [notebooks/IEEE_SCARF_Fusion_Colab_Benchmark.ipynb](./notebooks/IEEE_SCARF_Fusion_Colab_Benchmark.ipynb): Colab notebook for SCARF score-fusion benchmarking
-- [notebooks/IEEE_SAINT_Colab_Benchmark.ipynb](./notebooks/IEEE_SAINT_Colab_Benchmark.ipynb): Colab notebook for standalone SAINT benchmarking
-- [notebooks/IEEE_TABM_Colab_Benchmark.ipynb](./notebooks/IEEE_TABM_Colab_Benchmark.ipynb): Colab notebook for standalone TabM-style benchmarking
-- [notebooks/IEEE_REALMLP_Colab_Benchmark.ipynb](./notebooks/IEEE_REALMLP_Colab_Benchmark.ipynb): Colab notebook for standalone RealMLP-style benchmarking
-- [notebooks/IEEE_MLP_PLR_Colab_Benchmark.ipynb](./notebooks/IEEE_MLP_PLR_Colab_Benchmark.ipynb): Colab notebook for standalone MLP-PLR benchmarking
-- [notebooks/IEEE_MLP_PLR_Fusion_Colab_Benchmark.ipynb](./notebooks/IEEE_MLP_PLR_Fusion_Colab_Benchmark.ipynb): Colab notebook for MLP-PLR score-fusion benchmarking
 - [scripts/MVS_XAI_Dashboard.py](./scripts/MVS_XAI_Dashboard.py): dashboard prototype
-- [run_ieee_tcn.py](./run_ieee_tcn.py): standalone TCN sequence benchmark entrypoint
-- [run_ieee_scarf.py](./run_ieee_scarf.py): standalone SCARF benchmark entrypoint
-- [run_ieee_scarf_fusion.py](./run_ieee_scarf_fusion.py): SCARF score-fusion benchmark entrypoint
-- [run_ieee_saint.py](./run_ieee_saint.py): standalone SAINT benchmark entrypoint
-- [run_ieee_tabm.py](./run_ieee_tabm.py): standalone TabM-style benchmark entrypoint
-- [run_ieee_realmlp.py](./run_ieee_realmlp.py): standalone RealMLP-style benchmark entrypoint
-- [run_ieee_mlp_plr.py](./run_ieee_mlp_plr.py): standalone MLP-PLR benchmark entrypoint
-- [run_ieee_mlp_plr_fusion.py](./run_ieee_mlp_plr_fusion.py): MLP-PLR score-fusion benchmark entrypoint
+- [docs/current-main-direction.md](./docs/current-main-direction.md): accepted system direction after ablation
+- [docs/highest-result-research.md](./docs/highest-result-research.md): shortlist of next high-ROI improvements
+- [docs/negative-results.md](./docs/negative-results.md): excluded branches and rationale
 
-## Current architecture
+## Accepted architecture
 
-The current project backbone is centered on the IEEE-CIS notebook and uses:
+The current main system is a compact tabular ensemble:
 
-- `notebooks/`: Colab notebooks
-- `scripts/`: support scripts and dashboard code
-- `docs/`: notes and proposal files
-
-The active modeling path is:
-
-- fold-local preprocessing
-- temporal and aggregate tabular features
-- `XGBoost + LightGBM + CatBoost`
+- fold-local leakage-safe preprocessing
+- stable tabular feature backbone
+- `XGBoost`
+- `LightGBM`
+- `CatBoost`
 - `XGB` meta-learner
-- UID post-processing
-- threshold policy for balanced or high-recall operation
+- UID smoothing
+- threshold policy selection
 
-The current production-path default is the `baseline_tree` ablation preset in the IEEE notebook.
-Graph-derived features, time-decay weighting, and recent-window branches remain available for ablation,
-but they are not the accepted default because the current ablation evidence did not beat `baseline_tree`.
-
-## Notes
-
-- Raw datasets are intentionally excluded from Git because they are too large for GitHub.
-- Colab is the preferred execution environment for the notebooks.
-- The next architecture research phase is documented in [docs/research-roadmap.md](./docs/research-roadmap.md).
-- The first candidate extension is specified in [docs/tcn-branch-design.md](./docs/tcn-branch-design.md).
-- Experimental exclusions are recorded in [docs/negative-results.md](./docs/negative-results.md).
-- The next paper-design options after TCN are documented in [docs/scarf-saint-design.md](./docs/scarf-saint-design.md).
-- The controlled integration path for `SCARF` is documented in [docs/scarf-fusion-design.md](./docs/scarf-fusion-design.md).
-- The next deep-tabular backbone candidate is documented in [docs/tabm-design.md](./docs/tabm-design.md).
-- Follow-up backbone research after the TabM integration test is documented in [docs/post-tabm-research-notes.md](./docs/post-tabm-research-notes.md).
-- The RealMLP benchmark direction is documented in [docs/realmlp-design.md](./docs/realmlp-design.md).
-- The MLP-PLR benchmark direction is documented in [docs/mlp-plr-design.md](./docs/mlp-plr-design.md).
-- The controlled integration path for `MLP-PLR` is documented in [docs/mlp-plr-fusion-design.md](./docs/mlp-plr-fusion-design.md).
-- The current main-direction update after the temporal-drift experiments is documented in [docs/current-main-direction.md](./docs/current-main-direction.md).
-- The current highest-ROI improvement shortlist is documented in [docs/highest-result-research.md](./docs/highest-result-research.md).
+Graph-derived production logic, temporal recent/decay branches, and deep-model fusion paths were removed from the codebase after controlled ablations failed to beat the baseline tree ensemble.
 
 ## Run on Colab
 
-### Main IEEE-CIS notebook
-
 1. Open [notebooks/MVS_XAI_Colab_IEEE_CIS.ipynb](./notebooks/MVS_XAI_Colab_IEEE_CIS.ipynb) in Google Colab.
 2. Set `Runtime -> Change runtime type -> GPU`.
-3. Upload or mount access to the IEEE-CIS dataset folder:
+3. Mount or copy access to the IEEE-CIS dataset files:
    - `ieee-fraud-detection/train_transaction.csv`
    - `ieee-fraud-detection/train_identity.csv`
    - `ieee-fraud-detection/test_transaction.csv`
    - `ieee-fraud-detection/test_identity.csv`
-4. Update any dataset path variables in the notebook if your Drive structure is different.
-5. Run cells from top to bottom.
-6. On Colab free, prefer running one outer fold per session:
-   - set `RUN_OUTER_FOLD_ONLY = 0`, then run fold 1
-   - set `RUN_OUTER_FOLD_ONLY = 1`, then run fold 2
-   - set `RUN_OUTER_FOLD_ONLY = 2`, then run fold 3
-7. This does not change the fold result itself; it only avoids RAM accumulation across folds in the same session.
-8. To reproduce the accepted default system, keep:
-   - `ABLATION_PRESET = 'baseline_tree'`
-
-### TCN benchmark notebook
-
-1. Open [notebooks/IEEE_TCN_Colab_Benchmark.ipynb](./notebooks/IEEE_TCN_Colab_Benchmark.ipynb) in Google Colab.
-2. Set `Runtime -> Change runtime type -> GPU`.
-3. Keep the dataset zip in Drive, by default:
-   - `/content/drive/MyDrive/MVS_XAI_Data/ieee-fraud-detection.zip`
 4. Run cells from top to bottom.
-5. The notebook will:
-   - clone or pull the repo
-   - extract the IEEE dataset zip
-   - locate `train_transaction.csv` and `train_identity.csv`
-   - run `run_ieee_tcn.py`
+5. On Colab free, prefer one outer fold per session:
+   - `RUN_OUTER_FOLD_ONLY = 0`
+   - `RUN_OUTER_FOLD_ONLY = 1`
+   - `RUN_OUTER_FOLD_ONLY = 2`
+   - and in full confirmation, continue with `3` and `4`
 
-### SCARF benchmark notebook
+## Notes
 
-1. Open [notebooks/IEEE_SCARF_Colab_Benchmark.ipynb](./notebooks/IEEE_SCARF_Colab_Benchmark.ipynb) in Google Colab.
-2. Set `Runtime -> Change runtime type -> GPU`.
-3. Keep the dataset zip in Drive, by default:
-   - `/content/drive/MyDrive/MVS_XAI_Data/ieee-fraud-detection.zip`
-4. Run cells from top to bottom.
-5. The notebook will:
-   - clone or pull the repo
-   - extract the IEEE dataset zip
-   - locate `train_transaction.csv` and `train_identity.csv`
-   - run `run_ieee_scarf.py`
-
-### SAINT benchmark notebook
-
-1. Open [notebooks/IEEE_SAINT_Colab_Benchmark.ipynb](./notebooks/IEEE_SAINT_Colab_Benchmark.ipynb) in Google Colab.
-2. Set `Runtime -> Change runtime type -> GPU`.
-3. Keep the dataset zip in Drive, by default:
-   - `/content/drive/MyDrive/MVS_XAI_Data/ieee-fraud-detection.zip`
-4. Run cells from top to bottom.
-5. The notebook will:
-   - clone or pull the repo
-   - extract the IEEE dataset zip
-   - locate `train_transaction.csv` and `train_identity.csv`
-   - run `run_ieee_saint.py`
-
-### SCARF fusion notebook
-
-1. Open [notebooks/IEEE_SCARF_Fusion_Colab_Benchmark.ipynb](./notebooks/IEEE_SCARF_Fusion_Colab_Benchmark.ipynb) in Google Colab.
-2. Set `Runtime -> Change runtime type -> GPU`.
-3. Keep the dataset zip in Drive, by default:
-   - `/content/drive/MyDrive/MVS_XAI_Data/ieee-fraud-detection.zip`
-4. Run cells from top to bottom.
-5. The notebook will:
-   - clone or pull the repo
-   - extract the IEEE dataset zip
-   - locate `train_transaction.csv` and `train_identity.csv`
-   - run `run_ieee_scarf_fusion.py`
-
-### TabM benchmark notebook
-
-1. Open [notebooks/IEEE_TABM_Colab_Benchmark.ipynb](./notebooks/IEEE_TABM_Colab_Benchmark.ipynb) in Google Colab.
-2. Set `Runtime -> Change runtime type -> GPU`.
-3. Keep the dataset zip in Drive, by default:
-   - `/content/drive/MyDrive/MVS_XAI_Data/ieee-fraud-detection.zip`
-4. Run cells from top to bottom.
-5. The notebook will:
-   - clone or pull the repo
-   - extract the IEEE dataset zip
-   - locate `train_transaction.csv` and `train_identity.csv`
-   - run `run_ieee_tabm.py`
-
-### RealMLP benchmark notebook
-
-1. Open [notebooks/IEEE_REALMLP_Colab_Benchmark.ipynb](./notebooks/IEEE_REALMLP_Colab_Benchmark.ipynb) in Google Colab.
-2. Set `Runtime -> Change runtime type -> GPU`.
-3. Keep the dataset zip in Drive, by default:
-   - `/content/drive/MyDrive/MVS_XAI_Data/ieee-fraud-detection.zip`
-4. Run cells from top to bottom.
-5. The notebook will:
-   - clone or pull the repo
-   - copy the dataset zip to local Colab storage
-   - extract the IEEE dataset zip
-   - locate `train_transaction.csv` and `train_identity.csv`
-   - run `run_ieee_realmlp.py`
-
-### MLP-PLR benchmark notebook
-
-1. Open [notebooks/IEEE_MLP_PLR_Colab_Benchmark.ipynb](./notebooks/IEEE_MLP_PLR_Colab_Benchmark.ipynb) in Google Colab.
-2. Set `Runtime -> Change runtime type -> GPU`.
-3. Keep the dataset zip in Drive, by default:
-   - `/content/drive/MyDrive/MVS_XAI_Data/ieee-fraud-detection.zip`
-4. Run cells from top to bottom.
-5. The notebook will:
-   - clone or pull the repo
-   - copy the dataset zip to local Colab storage
-   - extract the IEEE dataset zip
-   - locate `train_transaction.csv` and `train_identity.csv`
-   - run `run_ieee_mlp_plr.py`
-
-### MLP-PLR fusion notebook
-
-1. Open [notebooks/IEEE_MLP_PLR_Fusion_Colab_Benchmark.ipynb](./notebooks/IEEE_MLP_PLR_Fusion_Colab_Benchmark.ipynb) in Google Colab.
-2. Set `Runtime -> Change runtime type -> GPU`.
-3. Keep the dataset zip in Drive, by default:
-   - `/content/drive/MyDrive/MVS_XAI_Data/ieee-fraud-detection.zip`
-4. Run cells from top to bottom.
-5. The notebook will:
-   - clone or pull the repo
-   - copy the dataset zip to local Colab storage
-   - extract the IEEE dataset zip
-   - locate `train_transaction.csv` and `train_identity.csv`
-   - run `run_ieee_mlp_plr_fusion.py`
+- Raw datasets are excluded from Git because of size.
+- Colab remains the preferred execution environment.
+- Further improvement work should beat the accepted baseline explicitly before it is added back into the main notebook.
