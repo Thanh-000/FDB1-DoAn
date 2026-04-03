@@ -140,7 +140,7 @@ def train_fold_mlp_plr(
     n_blocks: int = 4,
     n_frequencies: int = 8,
     lr: float = 1e-3,
-    use_time_feature: bool = True,
+    use_time_feature: bool = False,
 ) -> dict[str, float]:
     df = base_preprocess(load_ieee_train(data_dir))
     y = df["isFraud"].to_numpy()

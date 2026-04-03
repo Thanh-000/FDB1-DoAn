@@ -16,6 +16,7 @@ This repository contains the working code and notebooks for a fraud-detection re
 - [notebooks/IEEE_TABM_Colab_Benchmark.ipynb](./notebooks/IEEE_TABM_Colab_Benchmark.ipynb): Colab notebook for standalone TabM-style benchmarking
 - [notebooks/IEEE_REALMLP_Colab_Benchmark.ipynb](./notebooks/IEEE_REALMLP_Colab_Benchmark.ipynb): Colab notebook for standalone RealMLP-style benchmarking
 - [notebooks/IEEE_MLP_PLR_Colab_Benchmark.ipynb](./notebooks/IEEE_MLP_PLR_Colab_Benchmark.ipynb): Colab notebook for standalone MLP-PLR benchmarking
+- [notebooks/IEEE_MLP_PLR_Fusion_Colab_Benchmark.ipynb](./notebooks/IEEE_MLP_PLR_Fusion_Colab_Benchmark.ipynb): Colab notebook for MLP-PLR score-fusion benchmarking
 - [scripts/MVS_XAI_Dashboard.py](./scripts/MVS_XAI_Dashboard.py): dashboard prototype
 - [run_ieee_tcn.py](./run_ieee_tcn.py): standalone TCN sequence benchmark entrypoint
 - [run_ieee_scarf.py](./run_ieee_scarf.py): standalone SCARF benchmark entrypoint
@@ -24,6 +25,7 @@ This repository contains the working code and notebooks for a fraud-detection re
 - [run_ieee_tabm.py](./run_ieee_tabm.py): standalone TabM-style benchmark entrypoint
 - [run_ieee_realmlp.py](./run_ieee_realmlp.py): standalone RealMLP-style benchmark entrypoint
 - [run_ieee_mlp_plr.py](./run_ieee_mlp_plr.py): standalone MLP-PLR benchmark entrypoint
+- [run_ieee_mlp_plr_fusion.py](./run_ieee_mlp_plr_fusion.py): MLP-PLR score-fusion benchmark entrypoint
 
 ## Current architecture
 
@@ -56,6 +58,7 @@ The active modeling path is:
 - Follow-up backbone research after the TabM integration test is documented in [docs/post-tabm-research-notes.md](./docs/post-tabm-research-notes.md).
 - The RealMLP benchmark direction is documented in [docs/realmlp-design.md](./docs/realmlp-design.md).
 - The MLP-PLR benchmark direction is documented in [docs/mlp-plr-design.md](./docs/mlp-plr-design.md).
+- The controlled integration path for `MLP-PLR` is documented in [docs/mlp-plr-fusion-design.md](./docs/mlp-plr-fusion-design.md).
 
 ## Run on Colab
 
@@ -163,3 +166,17 @@ The active modeling path is:
    - extract the IEEE dataset zip
    - locate `train_transaction.csv` and `train_identity.csv`
    - run `run_ieee_mlp_plr.py`
+
+### MLP-PLR fusion notebook
+
+1. Open [notebooks/IEEE_MLP_PLR_Fusion_Colab_Benchmark.ipynb](./notebooks/IEEE_MLP_PLR_Fusion_Colab_Benchmark.ipynb) in Google Colab.
+2. Set `Runtime -> Change runtime type -> GPU`.
+3. Keep the dataset zip in Drive, by default:
+   - `/content/drive/MyDrive/MVS_XAI_Data/ieee-fraud-detection.zip`
+4. Run cells from top to bottom.
+5. The notebook will:
+   - clone or pull the repo
+   - copy the dataset zip to local Colab storage
+   - extract the IEEE dataset zip
+   - locate `train_transaction.csv` and `train_identity.csv`
+   - run `run_ieee_mlp_plr_fusion.py`
