@@ -10,6 +10,7 @@ This repository now keeps only the accepted production-path code and the support
 - [docs/current-main-direction.md](./docs/current-main-direction.md): accepted system direction after ablation
 - [docs/highest-result-research.md](./docs/highest-result-research.md): shortlist of next high-ROI improvements
 - [docs/next-architecture-proposal.md](./docs/next-architecture-proposal.md): next full-system architecture proposal
+- [docs/feature-stability-pruning.md](./docs/feature-stability-pruning.md): first concrete experiment on the accepted baseline
 - [docs/negative-results.md](./docs/negative-results.md): excluded branches and rationale
 
 ## Accepted architecture
@@ -42,6 +43,11 @@ Graph-derived production logic, temporal recent/decay branches, and deep-model f
    - `RUN_OUTER_FOLD_ONLY = 1`
    - `RUN_OUTER_FOLD_ONLY = 2`
    - and in full confirmation, continue with `3` and `4`
+6. To export fold-wise base-model feature importances for the next research cycle, set:
+   - `EXPORT_FOLD_IMPORTANCES = True`
+   - `IMPORTANCE_EXPORT_DIR = './artifacts/feature_importance'`
+7. After collecting the fold CSV files, aggregate them with:
+   - `py -3 scripts/feature_stability_pruning.py "artifacts/feature_importance/*.csv"`
 
 ## Notes
 
