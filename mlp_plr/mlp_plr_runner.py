@@ -40,6 +40,8 @@ DEFAULT_MLP_PLR_FEATURES = [
     "TimeDays",
 ]
 
+TIME_FEATURE = "TimeDays"
+
 
 class ArrayDataset(Dataset):
     def __init__(self, x: np.ndarray, y: np.ndarray):
@@ -98,8 +100,15 @@ def base_preprocess(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def build_fold_tabular(df_tr: pd.DataFrame, df_vl: pd.DataFrame) -> FoldTabularBundle:
+def build_fold_tabular(
+    df_tr: pd.DataFrame,
+    df_vl: pd.DataFrame,
+    *,
+    use_time_feature: bool = True,
+) -> FoldTabularBundle:
     feature_cols = [c for c in DEFAULT_MLP_PLR_FEATURES if c in df_tr.columns and c in df_vl.columns]
+    if not use_time_feature:
+        feature_cols = [c for c in feature_cols if c != TIME_FEATURE]
     if not feature_cols:
         raise ValueError("No MLP-PLR feature columns available")
 
@@ -131,6 +140,7 @@ def train_fold_mlp_plr(
     n_blocks: int = 4,
     n_frequencies: int = 8,
     lr: float = 1e-3,
+    use_time_feature: bool = True,
 ) -> dict[str, float]:
     df = base_preprocess(load_ieee_train(data_dir))
     y = df["isFraud"].to_numpy()
@@ -143,7 +153,7 @@ def train_fold_mlp_plr(
     print(f"[MLP-PLR] Fold {fold_index + 1}/{n_splits}")
     print(f"[MLP-PLR] Train: {len(df_tr)}, Val: {len(df_vl)}")
 
-    bundle = build_fold_tabular(df_tr, df_vl)
+    bundle = build_fold_tabular(df_tr, df_vl, use_time_feature=use_time_feature)
     print(f"[MLP-PLR] feature_cols ({len(bundle.feature_cols)}): {bundle.feature_cols}")
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -226,6 +236,7 @@ def main() -> None:
     parser.add_argument("--n-blocks", type=int, default=4)
     parser.add_argument("--n-frequencies", type=int, default=8)
     parser.add_argument("--lr", type=float, default=1e-3)
+    parser.add_argument("--no-time-feature", action="store_true")
     args = parser.parse_args()
 
     train_fold_mlp_plr(
@@ -238,6 +249,7 @@ def main() -> None:
         n_blocks=args.n_blocks,
         n_frequencies=args.n_frequencies,
         lr=args.lr,
+        use_time_feature=not args.no_time_feature,
     )
 
 
