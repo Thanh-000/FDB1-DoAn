@@ -1,113 +1,69 @@
 # Current Main Direction
 
-This note records the current accepted direction of the project after the recent deep-branch and temporal-drift experiments.
+This note records the current accepted direction of the project after the ablation study on the IEEE-CIS production notebook.
 
-## Current accepted main path
+## Accepted production-path default
 
-The project now treats the IEEE-CIS notebook as the primary production-path pipeline.
+The accepted default system is now the `baseline_tree` preset in the IEEE-CIS notebook.
 
-The current active system is:
+The default architecture is:
 
 - fold-local leakage-safe preprocessing
-- temporal and aggregate tabular features
-- graph-derived fold-local motif features
-- long-history branch:
-  - `XGBoost`
-  - `LightGBM`
-  - `CatBoost`
-- recent-window branch:
-  - `XGB_recent`
-  - `LGB_recent`
-  - `CatBoost_recent`
-- time-decay sample weighting
+- stable tabular feature backbone
+- `XGBoost`
+- `LightGBM`
+- `CatBoost`
 - `XGB` meta-learner
 - UID smoothing
-- threshold selection via policy (`best_f1`, `best_f2`, or `recall_at_precision`)
+- threshold selection by policy
 
-## Why this became the main direction
+## What was tested and rejected as default
 
-Recent experiments showed a consistent pattern:
+The following production-path additions were tested against the same fold protocol and did not beat `baseline_tree`:
 
-- several deep branches had real standalone signal
-- but their integration into the main system did not improve the final system metric
-- the more defensible improvement path was not "add a new architecture", but "improve temporal adaptation"
+- `graph_only`
+- `decay_only`
+- `recent_only`
+- `full_recent_decay`
 
-This was tested by adding:
+In other words:
 
-- a recent-window branch trained only on the newest part of the training fold
-- time-decay sample weights so newer examples matter more than older ones
+- graph-derived fold-local features did not improve the default system enough
+- time-decay weighting did not beat the simpler baseline
+- recent-window branch did not beat the simpler baseline
+- combining graph + time-decay + recent did not beat the simpler baseline
 
-Unlike the earlier deep-branch integrations, the recent branch was not ignored by the meta learner.
+## Why the default was rolled back
 
-## Screening evidence
+The project first explored a more complex temporal-adaptation path because several standalone research branches showed signal.
 
-Under the `3x2` screening setup with:
+However, the controlled notebook ablations showed a simpler conclusion:
 
-- `ENABLE_TIME_DECAY = True`
-- `TIME_DECAY_ALPHA = 2.0`
-- `ENABLE_RECENT_BRANCH = True`
-- `RECENT_TRAIN_FRAC = 0.35`
+- the strongest production-path result still comes from the compact tree-based backbone
+- additional complexity increased runtime and memory cost
+- the extra components did not improve the main metric consistently
 
-the following outer-fold results were obtained when each fold was run separately on Colab:
-
-- Fold 1:
-  - `AUPRC = 0.4995`
-  - `ROC-AUC = 0.8493`
-  - `F1 = 0.5123`
-  - `Precision = 0.6312`
-  - `Recall = 0.4311`
-- Fold 2:
-  - `AUPRC = 0.5263`
-  - `ROC-AUC = 0.8870`
-  - `F1 = 0.5186`
-  - `Precision = 0.6487`
-  - `Recall = 0.4320`
-- Fold 3:
-  - `AUPRC = 0.5342`
-  - `ROC-AUC = 0.9082`
-  - `F1 = 0.5293`
-  - `Precision = 0.6703`
-  - `Recall = 0.4373`
-
-Approximate screening mean:
-
-- `Mean AUPRC = 0.5200`
-- `Mean ROC-AUC = 0.8815`
-- `Mean F1 = 0.5201`
-- `Mean Precision = 0.6501`
-- `Mean Recall = 0.4334`
-
-These gains are not dramatic, but they are the strongest system-level evidence seen so far on the main path.
-
-## What was not accepted into the main path
-
-The following were tested but not accepted into the active backbone:
-
-- `GNN`
-- `TCN`
-- `SAINT`
-- `SCARF score fusion`
-- `TabM` integration
-- `RealMLP`
-- `MLP-PLR score fusion`
-
-Some of these remain useful research baselines, but not accepted production-path components.
+Therefore the default system was rolled back to the simpler and stronger baseline.
 
 ## Colab execution rule
 
-For Colab free users, the recommended notebook workflow is:
+For Colab free, the main notebook should still be run one outer fold at a time:
 
-- run exactly one outer fold per session
-- use `RUN_OUTER_FOLD_ONLY = 0`, `1`, or `2`
-- restart the runtime between folds
+- `RUN_OUTER_FOLD_ONLY = 0`
+- `RUN_OUTER_FOLD_ONLY = 1`
+- `RUN_OUTER_FOLD_ONLY = 2`
 
-This does not change the fold result.
-It only prevents RAM accumulation across multiple outer folds in the same Colab session.
+This is an execution strategy only.
+It does not change the fold result itself.
 
-## Practical conclusion
+## Research tracks that remain open
 
-The project should continue from this point by:
+Rolling back the default does not mean research is over.
+It means the accepted production-path baseline is now clear, and further work must beat it explicitly.
 
-1. keeping `recent-window + time-decay` as the active main-direction experiment
-2. using per-fold Colab runs for stable execution
-3. treating deep standalone branches as secondary research tracks unless they improve the full system metric after integration
+The most promising remaining directions are:
+
+- stronger feature-stability control
+- better temporal validation and threshold policy study
+- stronger tabular feature engineering with controlled ablation
+- deep branches only when they improve the final ensemble, not just standalone benchmarks

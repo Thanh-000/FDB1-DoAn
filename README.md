@@ -39,16 +39,14 @@ The active modeling path is:
 
 - fold-local preprocessing
 - temporal and aggregate tabular features
-- graph-derived motif features
 - `XGBoost + LightGBM + CatBoost`
-- time-decay sample weights on the long-history branch
-- recent-window branch:
-  - `XGB_recent`
-  - `LGB_recent`
-  - `CatBoost_recent`
 - `XGB` meta-learner
 - UID post-processing
 - threshold policy for balanced or high-recall operation
+
+The current production-path default is the `baseline_tree` ablation preset in the IEEE notebook.
+Graph-derived features, time-decay weighting, and recent-window branches remain available for ablation,
+but they are not the accepted default because the current ablation evidence did not beat `baseline_tree`.
 
 ## Notes
 
@@ -65,6 +63,7 @@ The active modeling path is:
 - The MLP-PLR benchmark direction is documented in [docs/mlp-plr-design.md](./docs/mlp-plr-design.md).
 - The controlled integration path for `MLP-PLR` is documented in [docs/mlp-plr-fusion-design.md](./docs/mlp-plr-fusion-design.md).
 - The current main-direction update after the temporal-drift experiments is documented in [docs/current-main-direction.md](./docs/current-main-direction.md).
+- The current highest-ROI improvement shortlist is documented in [docs/highest-result-research.md](./docs/highest-result-research.md).
 
 ## Run on Colab
 
@@ -84,6 +83,8 @@ The active modeling path is:
    - set `RUN_OUTER_FOLD_ONLY = 1`, then run fold 2
    - set `RUN_OUTER_FOLD_ONLY = 2`, then run fold 3
 7. This does not change the fold result itself; it only avoids RAM accumulation across folds in the same session.
+8. To reproduce the accepted default system, keep:
+   - `ABLATION_PRESET = 'baseline_tree'`
 
 ### TCN benchmark notebook
 
