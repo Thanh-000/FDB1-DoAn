@@ -10,7 +10,11 @@ The active system remains:
 
 - fold-local preprocessing
 - tabular backbone with graph-derived fold-local features
-- `XGBoost + LightGBM + CatBoost`
+- long-history branch:
+  - `XGBoost + LightGBM + CatBoost`
+- recent-window branch:
+  - `XGB_recent + LGB_recent + CatBoost_recent`
+- time-decay sample weighting
 - `XGB` meta-learner
 - UID smoothing
 - temporal evaluation on Colab
@@ -193,6 +197,45 @@ But when integrated into the main backbone:
 `TabM` is a valuable standalone benchmark and the strongest deep-tabular candidate tested so far.
 However, for this project stage it is still a research branch, not part of the accepted main architecture.
 
+## 6. MLP-PLR branch
+
+### What was tested
+
+A standalone `MLP-PLR` branch was benchmarked with:
+
+- periodic-linear numerical embeddings
+- a compact `20`-feature numerical subset
+- temporal fold evaluation on Colab
+- ablations on `TimeDays` and embedding frequency count
+
+The strongest standalone configuration was:
+
+- `USE_TIME_FEATURE = False`
+- `N_FREQUENCIES = 8`
+
+### Observed result
+
+`MLP-PLR` became the strongest standalone deep branch tested in the project.
+
+However, controlled score fusion into the main stacking system was negative:
+
+- baseline meta (`Nx3`) remained stronger
+- adding `MLP-PLR` score (`Nx4`) reduced `AUPRC`
+- it also reduced `ROC-AUC` in the tested fusion benchmark
+
+### Why it was not integrated
+
+`MLP-PLR` was not integrated into the main architecture because:
+
+- standalone strength did not translate into system-level gain
+- score fusion duplicated or distorted the signal already captured by the tree-based ensemble
+- the integration failed the same rule used for earlier branches: the final ensemble metric must improve
+
+### Interpretation
+
+`MLP-PLR` is a strong research benchmark and the best deep standalone branch tested so far.
+But under the tested fusion path, it is not an accepted component of the production-path architecture.
+
 ## What these negative results imply
 
 The project learned several important lessons:
@@ -210,7 +253,7 @@ An experimental branch is not integrated into the main architecture unless:
 - it wins as a standalone model
 - or it materially improves the main system after fusion
 
-The tested `GNN`, `TCN`, `SAINT`, `SCARF fusion`, and `TabM integration` branches did not satisfy that rule.
+The tested `GNN`, `TCN`, `SAINT`, `SCARF fusion`, `TabM integration`, and `MLP-PLR fusion` branches did not satisfy that rule.
 
 ## Consequence for the next phase
 
@@ -219,3 +262,4 @@ The next research phase should focus on more principled directions:
 - stronger backbone research rather than naive branch addition
 - representation-learning methods only when they can be shown to improve the final system
 - later graph-temporal work only if revisited at a much higher implementation level
+- temporal-drift handling in the main system, because this is the first direction that showed system-level positive evidence

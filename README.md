@@ -41,6 +41,11 @@ The active modeling path is:
 - temporal and aggregate tabular features
 - graph-derived motif features
 - `XGBoost + LightGBM + CatBoost`
+- time-decay sample weights on the long-history branch
+- recent-window branch:
+  - `XGB_recent`
+  - `LGB_recent`
+  - `CatBoost_recent`
 - `XGB` meta-learner
 - UID post-processing
 - threshold policy for balanced or high-recall operation
@@ -59,6 +64,7 @@ The active modeling path is:
 - The RealMLP benchmark direction is documented in [docs/realmlp-design.md](./docs/realmlp-design.md).
 - The MLP-PLR benchmark direction is documented in [docs/mlp-plr-design.md](./docs/mlp-plr-design.md).
 - The controlled integration path for `MLP-PLR` is documented in [docs/mlp-plr-fusion-design.md](./docs/mlp-plr-fusion-design.md).
+- The current main-direction update after the temporal-drift experiments is documented in [docs/current-main-direction.md](./docs/current-main-direction.md).
 
 ## Run on Colab
 
@@ -73,6 +79,11 @@ The active modeling path is:
    - `ieee-fraud-detection/test_identity.csv`
 4. Update any dataset path variables in the notebook if your Drive structure is different.
 5. Run cells from top to bottom.
+6. On Colab free, prefer running one outer fold per session:
+   - set `RUN_OUTER_FOLD_ONLY = 0`, then run fold 1
+   - set `RUN_OUTER_FOLD_ONLY = 1`, then run fold 2
+   - set `RUN_OUTER_FOLD_ONLY = 2`, then run fold 3
+7. This does not change the fold result itself; it only avoids RAM accumulation across folds in the same session.
 
 ### TCN benchmark notebook
 
