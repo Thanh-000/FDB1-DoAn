@@ -1,4 +1,5 @@
 import argparse
+import glob
 from pathlib import Path
 
 import numpy as np
@@ -11,7 +12,7 @@ REQUIRED_COLUMNS = {"fold", "model", "feature", "importance"}
 def load_inputs(paths: list[str]) -> pd.DataFrame:
     frames: list[pd.DataFrame] = []
     for raw_path in paths:
-        matched = sorted(Path().glob(raw_path)) if any(ch in raw_path for ch in "*?[]") else [Path(raw_path)]
+        matched = [Path(p) for p in sorted(glob.glob(raw_path))] if any(ch in raw_path for ch in "*?[]") else [Path(raw_path)]
         for path in matched:
             df = pd.read_csv(path)
             missing = REQUIRED_COLUMNS - set(df.columns)
