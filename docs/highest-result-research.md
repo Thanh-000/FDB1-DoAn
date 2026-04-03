@@ -46,7 +46,38 @@ Then:
 
 It directly targets the strongest existing system instead of introducing a new architecture risk.
 
-## Priority 2: threshold and operating-policy optimization
+Reference:
+
+- `TabFSBench: Tabular Benchmark for Feature Shifts in Open Environments`
+- https://arxiv.org/abs/2501.18935
+
+## Priority 2: temporal model selection
+
+### Why
+
+The project already showed that changing the production architecture directly is risky.
+A safer path is to keep a small set of strong baseline variants and choose among them using time-aware validation.
+
+### Goal
+
+Select the active production configuration using the time regime that is closest to deployment, rather than only the average score over the full history.
+
+### Method
+
+- build a small candidate pool of strong baseline variants
+- assess them on rolling recent windows
+- choose the current winner using temporal assessment, not architecture expansion
+
+### Why this is high ROI
+
+It addresses temporal drift without adding a new weak branch.
+
+Reference:
+
+- `Model Assessment and Selection under Temporal Distribution Shift`
+- https://proceedings.mlr.press/v235/han24b.html
+
+## Priority 3: threshold and operating-policy optimization
 
 ### Why
 
@@ -79,7 +110,7 @@ Systematically compare:
 
 This should be done on the accepted `baseline_tree` architecture first.
 
-## Priority 3: feature-space refinement, not feature expansion
+## Priority 4: feature-space refinement, not feature expansion
 
 ### Why
 
@@ -106,7 +137,33 @@ This can improve both:
 - generalization
 - runtime and Colab stability
 
-## Priority 4: stronger tabular optimization, not new branch fusion
+## Priority 5: selective classification and review gating
+
+### Why
+
+The current pipeline already has uncertainty and HITL hooks, but they are still a downstream add-on rather than a first-class decision layer.
+
+### Goal
+
+Move from binary fraud prediction to a selective system:
+
+- `ALLOW`
+- `BLOCK`
+- `REVIEW`
+
+### Method
+
+- calibrate probabilities on holdout data
+- estimate confidence or uncertainty
+- reject uncertain examples into the review queue
+- optimize the review budget explicitly
+
+Reference:
+
+- `Calibrated Selective Classification`
+- https://arxiv.org/abs/2208.12084
+
+## Priority 6: stronger tabular optimization, not new branch fusion
 
 ### Why
 
@@ -122,7 +179,22 @@ So if model-side work continues, it should stay very close to the accepted tree 
 
 The direction here is simplification and targeted tuning, not more branch diversity.
 
-## Priority 5: deep models only as research baselines
+## Priority 7: knowledge-enriched feature semantics
+
+### Why
+
+If a new modeling idea is introduced, the safest place to add it is the feature layer, where domain knowledge can strengthen the accepted baseline without requiring a whole new branch.
+
+### Recommended role
+
+Use domain concepts to enrich feature groups, rules, and column semantics before training the tree ensemble.
+
+Reference:
+
+- `Knowledge-Enriched Machine Learning for Tabular Data`
+- https://proceedings.mlr.press/v288/kim25a.html
+
+## Priority 8: deep models only as research baselines
 
 ### Why
 
@@ -159,9 +231,10 @@ These papers are the most relevant next references for improvement work:
 ## Recommended order of work
 
 1. feature stability pruning on the accepted baseline
-2. threshold/decision-policy study on the accepted baseline
-3. refine the tabular feature set with controlled ablation
-4. only after that, revisit model-level tuning or simplified retraining strategies
+2. temporal model selection among compact baseline variants
+3. threshold and selective-decision study on the accepted baseline
+4. refine the tabular feature set with controlled ablation
+5. only after that, revisit model-level tuning or simplified retraining strategies
 
 ## Practical conclusion
 

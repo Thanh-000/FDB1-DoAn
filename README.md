@@ -9,6 +9,7 @@ This repository now keeps only the accepted production-path code and the support
 - [scripts/MVS_XAI_Dashboard.py](./scripts/MVS_XAI_Dashboard.py): dashboard prototype
 - [docs/current-main-direction.md](./docs/current-main-direction.md): accepted system direction after ablation
 - [docs/highest-result-research.md](./docs/highest-result-research.md): shortlist of next high-ROI improvements
+- [docs/next-architecture-proposal.md](./docs/next-architecture-proposal.md): next full-system architecture proposal
 - [docs/negative-results.md](./docs/negative-results.md): excluded branches and rationale
 
 ## Accepted architecture
